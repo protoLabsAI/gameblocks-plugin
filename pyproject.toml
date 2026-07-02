@@ -1,0 +1,21 @@
+[project]
+name = "gameblocks-plugin"
+version = "0.1.0"
+description = "GameBlocks for protoAgent — vendored three.js building blocks + a skill so the agent composes browser 3D game prototypes and renders them as artifacts."
+requires-python = ">=3.11"
+
+# Runtime deps come from the protoAgent host (langchain-core, fastapi); this plugin
+# adds none — the manifest's requires_pip is empty and vendor/ is data, not code.
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+extend-exclude = ["vendor"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W"]
+ignore = ["E501"]

@@ -1,0 +1,28 @@
+# protoagent.plugin.yaml — data only; the host reads this without importing code.
+# Keep `version` in lockstep with pyproject.toml (tests/test_manifest.py enforces it).
+id: gameblocks
+name: GameBlocks
+version: 0.1.0
+description: >-
+  Browser-3D-game building blocks for the agent, vendored from xt4d/GameBlocks: 74
+  self-contained three.js modules (coordinate frames, motion controllers, camera rigs,
+  behaviors, gameplay loops, world builders, HUDs) plus a skill that teaches the agent
+  to compose them instead of deriving 3D math from scratch. Pairs with the artifact
+  plugin: the agent assembles a single-file HTML game that imports blocks from this
+  plugin's module server and renders it in the sandboxed artifact panel.
+enabled: false                 # ships disabled — enabling is the operator's trust decision
+repository: https://github.com/protoLabsAI/gameblocks-plugin
+min_protoagent_version: "0.27.0"   # register_tool/skill_dir/router — no console view, no /_ds need
+
+config_section: gameblocks
+config:
+  export_enabled: true
+settings:
+  - { key: export_enabled, label: "Allow module export", type: bool, description: "Let the agent copy vendored modules into project directories (gameblocks_export_modules). Reading blocks and serving them to game artifacts stays available either way." }
+
+# Declarative transparency: the SERVER makes no outbound calls (blocks are vendored).
+# Game pages reference pinned cdn.jsdelivr.net URLs for three.js / Rapier3D in the
+# BROWSER (the sandboxed artifact iframe), not from this process.
+capabilities:
+  network: []
+  filesystem: scoped           # writes only via gameblocks_export_modules, gated by export_enabled

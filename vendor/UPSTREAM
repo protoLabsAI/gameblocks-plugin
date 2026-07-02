@@ -1,0 +1,6 @@
+source: https://github.com/xt4d/GameBlocks
+ref: main
+sha: ba678d6b82890d151cc839c090fda8ef883c0184
+synced: 2026-07-01
+license: MIT (see vendor/LICENSE)
+# Re-vendor with scripts/sync_upstream.sh — never hand-edit vendor/gameblocks/.
