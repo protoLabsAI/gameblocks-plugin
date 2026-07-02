@@ -88,6 +88,24 @@ def gameblocks_read_module(paths: str) -> str:
 
 
 @tool
+def gameblocks_game_template() -> str:
+    """Starter HTML shell for a GameBlocks game artifact — call this instead of
+    writing the boilerplate by hand. The shell is already correct: the runtime
+    import-map preamble (three.js / Rapier / gameblocks over HTTP), renderer,
+    camera, lights, resize handling, a click-to-start overlay that fixes keyboard
+    focus in the sandbox, a `keys` input set, and a clamped-dt game loop. Replace
+    the two marked sections — `GAME SETUP (replace)` and `UPDATE (replace)` — with
+    composed blocks, then render the whole file with show_artifact(kind="html")."""
+    from pathlib import Path
+
+    f = Path(__file__).resolve().parent / "templates" / "game.html"
+    try:
+        return f.read_text(encoding="utf-8")
+    except OSError:
+        return "Game template is missing — reinstall the gameblocks plugin."
+
+
+@tool
 def gameblocks_export_modules(paths: str, dest_dir: str) -> str:
     """Copy vendored GameBlocks modules into a project directory, preserving their
     relative layout so inter-module imports keep working (project mode — building a
@@ -121,7 +139,12 @@ def register(registry) -> None:
     global _REGISTRY
     _REGISTRY = registry
 
-    for t in (gameblocks_index, gameblocks_read_module, gameblocks_export_modules):
+    for t in (
+        gameblocks_index,
+        gameblocks_read_module,
+        gameblocks_game_template,
+        gameblocks_export_modules,
+    ):
         registry.register_tool(t)
 
     try:

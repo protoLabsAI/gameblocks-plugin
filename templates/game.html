@@ -1,0 +1,108 @@
+<!doctype html>
+<!--
+  GameBlocks artifact starter — returned by gameblocks_game_template(). The shell is
+  done: import map, renderer, camera, lights, resize, focus-fixing start overlay,
+  keyboard state, clamped-dt loop. Replace the two sections marked (replace); keep
+  the import-map script FIRST (an import map must exist before any module loads).
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Game</title>
+<style>
+  html,body{margin:0;height:100%;overflow:hidden;background:#0a0a0c;color:#ededed;
+    font-family:system-ui,sans-serif}
+  #game{display:block;width:100%;height:100%;outline:none}
+  #hud{position:fixed;inset:0;pointer-events:none}
+  #start{position:fixed;inset:0;display:grid;place-items:center;cursor:pointer;
+    background:rgba(10,10,12,.82);z-index:10}
+  #start .card{padding:16px 28px;border:1px solid rgba(255,255,255,.18);border-radius:10px}
+</style>
+<script>
+  // GameBlocks runtime import map — MUST stay the first script. document.baseURI is
+  // inherited from the artifact shell (this sandbox has no URL of its own) and keeps
+  // the fleet-proxy slug base. Pins mirror the vendored summary.md.
+  var GB_ROOT = document.baseURI.split("/plugins/")[0];
+  var im = document.createElement("script");
+  im.type = "importmap";
+  im.textContent = JSON.stringify({ imports: {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.161.0/examples/jsm/",
+    "@dimforge/rapier3d-compat": "https://cdn.jsdelivr.net/npm/@dimforge/rapier3d-compat@0.14.0/rapier.es.js",
+    "gameblocks/": GB_ROOT + "/plugins/gameblocks/"
+  }});
+  document.currentScript.after(im);
+</script>
+</head>
+<body>
+<canvas id="game" tabindex="0"></canvas>
+<div id="hud"></div><!-- pointer-events:none overlay for DomHudRenderer / score text -->
+<div id="start"><div class="card">Click to play</div></div>
+
+<script type="module">
+import * as THREE from "three";
+// Unmodified blocks import over HTTP (they pull their own relative deps); inline any
+// block you ADAPT instead. Example:
+// import { WorldBasis } from "gameblocks/modules/math/WorldBasis.js";
+
+// ── boot ────────────────────────────────────────────────────────────────────
+const canvas = document.getElementById("game");
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x10131a);
+const camera = new THREE.PerspectiveCamera(70, 1, 0.1, 1000);
+camera.position.set(0, 3, 6);
+scene.add(new THREE.HemisphereLight(0xbfd4ff, 0x202028, 1.0));
+const sun = new THREE.DirectionalLight(0xffffff, 1.2);
+sun.position.set(4, 8, 3);
+scene.add(sun);
+
+function resize(){
+  const w = innerWidth, h = innerHeight;
+  renderer.setSize(w, h, false);
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+}
+addEventListener("resize", resize);
+resize();
+
+// ── input ───────────────────────────────────────────────────────────────────
+// The sandboxed iframe only gets key events once it has focus — the start overlay
+// exists to make the first click land inside the game, then focuses the canvas.
+let running = false;
+const keys = new Set();
+addEventListener("keydown", e => { keys.add(e.code); if (e.code === "Tab") e.preventDefault(); });
+addEventListener("keyup", e => keys.delete(e.code));
+document.getElementById("start").addEventListener("click", () => {
+  document.getElementById("start").remove();
+  canvas.focus();
+  // Mouse-look games: also call canvas.requestPointerLock() here (the sandbox allows it).
+  running = true;
+});
+
+// ── GAME SETUP (replace) ─────────────────────────────────────────────────────
+// Compose GameBlocks here: a motion controller + its recommended camera rig, world/
+// environment factories, gameplay directors. Placeholder so the template renders as-is:
+const cube = new THREE.Mesh(
+  new THREE.BoxGeometry(1, 1, 1),
+  new THREE.MeshStandardMaterial({ color: 0x9b87f2 })
+);
+cube.position.y = 0.5;
+scene.add(cube);
+scene.add(new THREE.GridHelper(40, 40, 0x333344, 0x222230));
+
+// ── loop ─────────────────────────────────────────────────────────────────────
+const clock = new THREE.Clock();
+renderer.setAnimationLoop(() => {
+  const dt = Math.min(clock.getDelta(), 1 / 20); // clamped so a background tab can't explode physics
+  if (running) {
+    // ── UPDATE (replace): drive controllers / rigs / gameplay with dt + keys ──
+    cube.rotation.y += dt;
+  }
+  renderer.render(scene, camera);
+});
+</script>
+</body>
+</html>

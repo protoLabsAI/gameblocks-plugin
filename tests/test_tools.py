@@ -7,8 +7,20 @@ from conftest import FakeRegistry
 
 def test_docstrings_are_real_descriptions(plugin):
     # The @tool description is the docstring; an f-string "docstring" would ship None.
-    for t in (plugin.gameblocks_index, plugin.gameblocks_read_module, plugin.gameblocks_export_modules):
+    for t in (
+        plugin.gameblocks_index,
+        plugin.gameblocks_read_module,
+        plugin.gameblocks_game_template,
+        plugin.gameblocks_export_modules,
+    ):
         assert isinstance(t.description, str) and len(t.description) > 40
+
+
+def test_game_template_tool_returns_the_shell(plugin):
+    out = plugin.gameblocks_game_template.invoke({})
+    assert out.lower().startswith("<!doctype html>")
+    assert "GAME SETUP (replace)" in out
+    assert "UPDATE (replace)" in out
 
 
 def test_index_returns_catalog(plugin):

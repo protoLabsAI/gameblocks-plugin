@@ -1,6 +1,6 @@
 [project]
 name = "gameblocks-plugin"
-version = "0.1.0"
+version = "0.2.0"
 description = "GameBlocks for protoAgent — vendored three.js building blocks + a skill so the agent composes browser 3D game prototypes and renders them as artifacts."
 requires-python = ">=3.11"
 

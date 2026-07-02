@@ -2,7 +2,7 @@
 # Keep `version` in lockstep with pyproject.toml (tests/test_manifest.py enforces it).
 id: gameblocks
 name: GameBlocks
-version: 0.1.0
+version: 0.2.0
 description: >-
   Browser-3D-game building blocks for the agent, vendored from xt4d/GameBlocks: 74
   self-contained three.js modules (coordinate frames, motion controllers, camera rigs,
