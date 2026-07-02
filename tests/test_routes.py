@@ -7,6 +7,7 @@ def test_register_contributions(registry):
     assert [t.name for t in registry.tools] == [
         "gameblocks_index",
         "gameblocks_read_module",
+        "gameblocks_game_template",
         "gameblocks_export_modules",
     ]
     assert registry.skill_dirs == ["skills"]

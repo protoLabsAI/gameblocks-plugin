@@ -27,41 +27,32 @@ that already got this right. **Compose them; don't re-derive them.**
 
 Build the game as **one HTML file** and render it with `show_artifact(kind="html", ...)` — the
 user plays it right in the artifact panel, and `update_artifact` gives you iteration/versioning
-for free. Keep the file small by importing unmodified blocks over HTTP from this plugin instead
-of inlining them.
+for free.
 
-The artifact runs in a sandboxed iframe with **no own URL**, so the import map must be built at
-runtime from `document.baseURI` (inherited from the shell). Make this preamble the FIRST script
-in the file — an import map must exist before any module loads:
+**Start from `gameblocks_game_template()` — never write the shell by hand.** The template is a
+working page (it renders a placeholder scene as-is) with the fragile boilerplate already
+correct: the runtime import-map preamble, renderer/camera/lights/resize, a click-to-start
+overlay that fixes keyboard focus in the sandbox, a `keys` input set, and a clamped-dt loop.
+Replace exactly two marked sections:
 
-```html
-<script>
-  // Host base: "" on the host window, "/agents/<slug>" through the fleet proxy.
-  var GB_ROOT = document.baseURI.split("/plugins/")[0];
-  var im = document.createElement("script");
-  im.type = "importmap";
-  im.textContent = JSON.stringify({ imports: {
-    "three": "https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js",
-    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.161.0/examples/jsm/",
-    "@dimforge/rapier3d-compat": "https://cdn.jsdelivr.net/npm/@dimforge/rapier3d-compat@0.14.0/rapier.es.js",
-    "gameblocks/": GB_ROOT + "/plugins/gameblocks/"
-  }});
-  document.currentScript.after(im);
-</script>
-<script type="module">
-  import { WorldBasis } from "gameblocks/modules/math/WorldBasis.js";
-  // … game setup: scene, renderer, blocks, loop …
-</script>
-```
+- `GAME SETUP (replace)` — compose blocks: a motion controller + its recommended camera rig,
+  world/environment factories, gameplay directors.
+- `UPDATE (replace)` — drive them with `dt` + the `keys` set each frame.
 
-- Blocks import each other by relative path, so importing one block over HTTP pulls its
-  dependencies automatically. An **adapted** block can't be imported over HTTP — inline your
-  adapted copy in the artifact (and stop importing that one path).
-- Input: give the page a click-to-start overlay that focuses the canvas; the sandbox allows
-  pointer lock for mouse-look games. WebGL works normally.
+Rules that keep it working:
+
+- The import-map preamble must stay the FIRST script: the artifact sandbox has **no own URL**,
+  so the map is built at runtime from `document.baseURI` (inherited from the shell, slug-safe
+  through the fleet proxy), and an import map must exist before any module loads.
+- Unmodified blocks import over HTTP via the map's `gameblocks/` prefix — e.g.
+  `import { WorldBasis } from "gameblocks/modules/math/WorldBasis.js"` — and pull their own
+  relative dependencies automatically. An **adapted** block can't come over HTTP: read it with
+  `gameblocks_read_module`, adapt, and inline the copy (and stop importing that one path).
+- Mouse-look games: add `canvas.requestPointerLock()` in the start-overlay click handler (the
+  sandbox allows pointer lock). WebGL works normally.
 - Respect the artifact size cap (default 512 KB) — HTTP imports keep you far under it.
-- Browser-side network is required for the three.js / Rapier CDN pins above (the pins come
-  from the vendored `summary.md` — check it if versions move).
+- The three.js / Rapier CDN pins live in the template and mirror the vendored `summary.md` —
+  check it if versions move (browser-side network is required for those two).
 
 ## Project mode (a real repo)
 

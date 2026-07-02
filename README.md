@@ -22,6 +22,7 @@ project mode still works.
 | --- | --- |
 | `gameblocks_index` (tool) | The module catalog with one-line capabilities — the agent's entry point. |
 | `gameblocks_read_module` (tool) | Source of one or more blocks, for studying or adapting. |
+| `gameblocks_game_template` (tool) | A complete, working starter HTML shell (import map, renderer, resize, focus-fixing start overlay, input, clamped-dt loop) with two marked replace-me sections — the agent never writes the boilerplate by hand. |
 | `gameblocks_export_modules` (tool) | Copies blocks into a real project dir, preserving relative layout (project mode). Gate it off with `export_enabled: false`. |
 | `gameblocks` (skill) | The compose-don't-derive workflow: WorldBasis as coordinate truth, artifact mode (with the runtime import-map preamble), project mode, controller↔camera pairings. |
 | Module server (public router) | `GET /plugins/gameblocks/modules/<path>` + `/summary.md`, served with `Access-Control-Allow-Origin: *` so the opaque-origin artifact sandbox can import blocks over HTTP. Strictly allowlisted to the vendored tree. |

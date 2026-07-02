@@ -25,30 +25,48 @@ def test_frontmatter():
     assert "3D game" in meta["description"]
 
 
-def test_body_teaches_the_pairing_and_the_preamble():
+def test_body_teaches_the_pairing_and_the_template():
     _, body = _parts()
-    # The tool loop
+    # The tool loop, template-first
     assert "gameblocks_index" in body
     assert "gameblocks_read_module" in body
+    assert "gameblocks_game_template" in body
     assert "gameblocks_export_modules" in body
     # Artifact pairing (soft — by tool name, never a cross-plugin import)
     assert "show_artifact" in body
-    # The import-map preamble and its two invariants
-    assert "importmap" in body
+    # The sandbox invariant the template encodes
     assert "document.baseURI" in body
-    assert "/plugins/gameblocks" in body
     # Coordinate discipline
     assert "WorldBasis" in body
 
 
-def test_pins_match_vendored_summary():
-    """The CDN pins in the skill must match the deps upstream declares in summary.md."""
+def _template() -> str:
+    return (ROOT / "templates" / "game.html").read_text(encoding="utf-8")
+
+
+def test_template_shell_is_complete():
+    """The single source of the boilerplate: preamble + the pieces the agent must not
+    have to rewrite, and the two sections it must."""
+    t = _template()
+    assert 'type = "importmap"' in t or "importmap" in t
+    assert "document.baseURI" in t
+    assert '"/plugins/"' in t  # slug-safe base split
+    assert '"gameblocks/": GB_ROOT + "/plugins/gameblocks/"' in t
+    assert "GAME SETUP (replace)" in t
+    assert "UPDATE (replace)" in t
+    assert "requestPointerLock" in t  # the mouse-look hint lives where it's used
+    # The preamble script precedes the module script (import map before any module load).
+    assert t.index("importmap") < t.index('type="module"')
+
+
+def test_template_pins_match_vendored_summary():
+    """The CDN pins in the template must match the deps upstream declares in summary.md."""
     from gameblocks_plugin import blocks
 
-    _, body = _parts()
+    t = _template()
     summary = blocks.summary_text()
     for lib in ("three@", "rapier3d-compat@"):
         pin_in_summary = [ln for ln in summary.splitlines() if lib in ln]
         assert pin_in_summary, f"summary.md no longer pins {lib}"
         version = pin_in_summary[0].split(lib)[1].split("/")[0]
-        assert f"{lib}{version}" in body, f"skill pin for {lib} drifted from summary.md ({version})"
+        assert f"{lib}{version}" in t, f"template pin for {lib} drifted from summary.md ({version})"
